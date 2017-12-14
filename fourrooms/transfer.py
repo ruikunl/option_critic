@@ -203,9 +203,10 @@ if __name__ == '__main__':
     fname = '-'.join(['{}_{}'.format(param, val) for param, val in sorted(vars(args).items())])
     fname = 'optioncritic-fourrooms-' + fname + '.npy'
 
-    possible_next_goals = [68, 69, 70, 71, 72, 78, 79, 80, 81, 82, 88, 89, 90, 91, 92, 93, 99, 100, 101, 102, 103]
+   # possible_next_goals = [68, 69, 70, 71, 72, 78, 79, 80, 81, 82, 88, 89, 90, 91, 92, 93, 99, 100, 101, 102, 103]
+    possible_next_goals = [68, 80, 90, 103]
 
-    history = np.zeros((args.nruns, args.nepisodes, 2))
+    history = np.zeros((args.nruns, args.nepisodes, 3))
     for run in range(args.nruns):
         features = Tabular(env.observation_space.n)
         nfeatures, nactions = len(features), env.action_space.n
@@ -239,9 +240,11 @@ if __name__ == '__main__':
         intraoption_improvement = IntraOptionGradient(option_policies, args.lr_intra)
 
         for episode in range(args.nepisodes):
-            if episode == 1000:
-                env.goal = rng.choice(possible_next_goals)
-                print('************* New goal : ', env.goal)
+            env.reset()
+            if episode % 1000 == 0:
+               # env.goal = rng.choice(possible_next_goals)
+                env.env.randomizeGoal()
+                print('************* New goal : ', env.env.goal)
 
             phi = features(env.reset())
             option = policy.sample(phi)
@@ -256,7 +259,7 @@ if __name__ == '__main__':
             for step in range(args.nsteps):
                 observation, reward, done, _ = env.step(action)
                 phi = features(observation)
-
+               # print("Observation:", observation, ", reward:", reward,", goal:", env.env.goal)
                 # Termination might occur upon entering the new state
                 if option_terminations[option].sample(phi):
                     option = policy.sample(phi)
@@ -287,7 +290,8 @@ if __name__ == '__main__':
 
             history[run, episode, 0] = step
             history[run, episode, 1] = avgduration
+            history[run, episode, 2] = cumreward
             print('Run {} episode {} steps {} cumreward {} avg. duration {} switches {}'.format(run, episode, step, cumreward, avgduration, option_switches))
-        np.save(fname, history)
+            np.save(fname, history)
         dill.dump({'intra_policies':option_policies, 'policy':policy, 'term':option_terminations}, open('oc-options.pl', 'wb'))
         print(fname)

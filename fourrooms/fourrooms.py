@@ -1,8 +1,8 @@
 import numpy as np
-from gym import core, spaces
+from gym import spaces
 from gym.envs.registration import register
-
-class Fourrooms:
+import gym
+class Fourrooms(gym.Env):
     def __init__(self):
         layout = """\
 wwwwwwwwwwwww
@@ -37,7 +37,7 @@ wwwwwwwwwwwww
                     statenum += 1
         self.tocell = {v:k for k,v in self.tostate.items()}
 
-        self.goal = 62
+        self.goal = 68
         self.init_states = list(range(self.observation_space.n))
         self.init_states.remove(self.goal)
 
@@ -50,7 +50,8 @@ wwwwwwwwwwwww
         return avail
 
     def reset(self):
-        state = self.rng.choice(self.init_states)
+       # state = self.rng.choice(self.init_states)
+        state = 62
         self.currentcell = self.tocell[state]
         return state
 
@@ -74,8 +75,11 @@ wwwwwwwwwwwww
 
         state = self.tostate[self.currentcell]
         done = state == self.goal
-        return state, float(done), done, None
-
+       # print("state:",state,", goal:", self.goal)
+        return state, float(done), False, None
+    def randomizeGoal(self):
+        self.goal = np.random.choice([68,80,90,103])
+        pass
 register(
     id='Fourrooms-v0',
     entry_point='fourrooms:Fourrooms',
