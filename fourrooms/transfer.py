@@ -292,6 +292,6 @@ if __name__ == '__main__':
             history[run, episode, 1] = avgduration
             history[run, episode, 2] = cumreward
             print('Run {} episode {} steps {} cumreward {} avg. duration {} switches {}'.format(run, episode, step, cumreward, avgduration, option_switches))
-            np.save(fname, history)
+        np.save(fname, history)
         dill.dump({'intra_policies':option_policies, 'policy':policy, 'term':option_terminations}, open('oc-options.pl', 'wb'))
         print(fname)
