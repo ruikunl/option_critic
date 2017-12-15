@@ -200,9 +200,9 @@ if __name__ == '__main__':
     rng = np.random.RandomState(1234)
     env = gym.make('Fourrooms-v0')
 
-    fname = '-'.join(['{}_{}'.format(param, val) for param, val in sorted(vars(args).items())])
-    fname = 'optioncritic-fourrooms-' + fname + '.npy'
-
+    # fname = '-'.join(['{}_{}'.format(param, val) for param, val in sorted(vars(args).items())])
+    # fname = 'optioncritic-fourrooms-' + fname + '.npy'
+    fname = 'optioncritic-fourrooms-sampled_task.npy'
    # possible_next_goals = [68, 69, 70, 71, 72, 78, 79, 80, 81, 82, 88, 89, 90, 91, 92, 93, 99, 100, 101, 102, 103]
     possible_next_goals = [68, 80, 90, 103]
 
@@ -241,10 +241,12 @@ if __name__ == '__main__':
 
         for episode in range(args.nepisodes):
             env.reset()
-            if episode % 1000 == 0:
+            if episode % 1000 == 0 and episode < 200000:
                # env.goal = rng.choice(possible_next_goals)
                 env.env.randomizeGoal()
                 print('************* New goal : ', env.env.goal)
+            if episode == 200000:
+                env.env.SetConstantGoal()
 
             phi = features(env.reset())
             option = policy.sample(phi)
@@ -292,6 +294,7 @@ if __name__ == '__main__':
             history[run, episode, 1] = avgduration
             history[run, episode, 2] = cumreward
             print('Run {} episode {} steps {} cumreward {} avg. duration {} switches {}'.format(run, episode, step, cumreward, avgduration, option_switches))
-            np.save(fname, history)
+            if episode % 10000 ==0:
+                np.save(fname, history)
         dill.dump({'intra_policies':option_policies, 'policy':policy, 'term':option_terminations}, open('oc-options.pl', 'wb'))
         print(fname)

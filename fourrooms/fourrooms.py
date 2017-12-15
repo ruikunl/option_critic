@@ -80,6 +80,11 @@ wwwwwwwwwwwww
     def randomizeGoal(self):
         self.goal = np.random.choice([68,80,90,103])
         pass
+
+    def SetConstantGoal(self):
+        self.goal = 103
+        pass
+
 register(
     id='Fourrooms-v0',
     entry_point='fourrooms:Fourrooms',
